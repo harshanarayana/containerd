@@ -92,6 +92,8 @@ const (
 	SandboxControllerPlugin Type = "io.containerd.sandbox.controller.v1"
 	// WarningPlugin implements a warning service
 	WarningPlugin Type = "io.containerd.warning.v1"
+	// ImageVerifierPlugin implements an image verifier service
+	ImageVerifierPlugin Type = "io.containerd.image-verifier.v1"
 )
 
 const (

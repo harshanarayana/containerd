@@ -28,6 +28,7 @@ import (
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/leases"
+	"github.com/containerd/containerd/pkg/imageverifier"
 	"github.com/containerd/containerd/pkg/kmutex"
 	"github.com/containerd/containerd/pkg/transfer"
 	"github.com/containerd/containerd/pkg/unpack"
@@ -35,9 +36,10 @@ import (
 )
 
 type localTransferService struct {
-	leases  leases.Manager
-	content content.Store
-	images  images.Store
+	leases    leases.Manager
+	content   content.Store
+	images    images.Store
+	verifiers map[string]imageverifier.ImageVerifier
 	// limiter for upload
 	limiterU *semaphore.Weighted
 	// limiter for download operation
@@ -45,12 +47,13 @@ type localTransferService struct {
 	config   TransferConfig
 }
 
-func NewTransferService(lm leases.Manager, cs content.Store, is images.Store, tc *TransferConfig) transfer.Transferrer {
+func NewTransferService(lm leases.Manager, cs content.Store, is images.Store, vfs map[string]imageverifier.ImageVerifier, tc *TransferConfig) transfer.Transferrer {
 	ts := &localTransferService{
-		leases:  lm,
-		content: cs,
-		images:  is,
-		config:  *tc,
+		leases:    lm,
+		content:   cs,
+		images:    is,
+		verifiers: vfs,
+		config:    *tc,
 	}
 	if tc.MaxConcurrentUploadedLayers > 0 {
 		ts.limiterU = semaphore.NewWeighted(int64(tc.MaxConcurrentUploadedLayers))
